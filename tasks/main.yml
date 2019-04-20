@@ -1,0 +1,86 @@
+---
+
+# https://github.com/reloxx13/TasmoAdmin/wiki/Guide-for-Ubuntu-Server-16.04
+
+- name: update apt index
+  apt:
+    update_cache: true
+  become: true
+
+- name: install dependencies
+  apt:
+    name:
+      - apache2
+      - php
+      - libapache2-mod-php
+      - php7.0-curl
+      - php7.0-zip
+  become: true
+
+- name: 'clone TasmoAdmin'
+  git:
+    repo: 'https://github.com/reloxx13/TasmoAdmin.git'
+    dest: '/var/www/tasmoadmin'
+    version: "{{ tasmoadmin_version }}"
+    force: true
+  become: true
+
+- name: 'set tasmoadmin owner'
+  file:
+    path: '/var/www/tasmoadmin'
+    owner:  'www-data'
+    group: 'www-data'
+    recurse: true
+  become: true
+
+- name: 'set permissions on tasmoadmin tmp'
+  file:
+    path: '/var/www/tasmoadmin/tasmoadmin/tmp'
+    mode: '777'
+  become: true
+  notify: restart apache
+
+- name: 'set permissions on tasmoadmin data'
+  file:
+    path: '/var/www/tasmoadmin/tasmoadmin/data'
+    mode: '777'
+  become: true
+  notify: restart apache
+
+- name: 'remove cache for php files'
+  file:
+    path: '/etc/php/7.0/apache2/conf.d/opcache.ini'
+    state: absent
+  become: true
+  notify: restart apache
+
+- name: 'copy tasmoadmin.conf'
+  template:
+    src: 'templates/tasmoadmin.conf'
+    dest: '/etc/apache2/sites-available/tasmoadmin.conf'
+  become: true
+  notify: restart apache
+
+- name: 'copy ports.conf'
+  template:
+    src: 'templates/ports.conf'
+    dest: '/etc/apache2/ports.conf'
+  become: true
+  notify: restart apache
+
+- name: 'enable site'
+  command: 'a2ensite tasmoadmin'
+  become: true
+  notify: restart apache
+
+- name: 'enable mod'
+  command: 'sudo a2enmod rewrite'
+  become: true
+  notify: restart apache
+
+- name: 'start apache'
+  systemd:
+    name: apache2
+    enabled: true
+    state: started
+

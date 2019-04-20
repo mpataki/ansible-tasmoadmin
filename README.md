@@ -1,0 +1,2 @@
+- [ ] ready the repo ansible galaxy
+- [ ] setup travis
