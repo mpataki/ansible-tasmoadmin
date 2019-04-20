@@ -1,5 +1,4 @@
 ---
-
 # https://github.com/reloxx13/TasmoAdmin/wiki/Guide-for-Ubuntu-Server-16.04
 
 - name: update apt index
@@ -74,7 +73,7 @@
   notify: restart apache
 
 - name: 'enable mod'
-  command: 'sudo a2enmod rewrite'
+  command: 'a2enmod rewrite'
   become: true
   notify: restart apache
 
@@ -83,4 +82,3 @@
     name: apache2
     enabled: true
     state: started
-
